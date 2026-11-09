@@ -10,7 +10,6 @@ import {
 } from "../shared/db";
 import { response } from "../shared/http";
 import { logRequest } from "../shared/request-logger";
-import { table } from "console";
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -41,24 +40,25 @@ export const handler = async (
     const actor = toActor(actorResult.Item);
     // if no movie is given so just return the actor's profile
     if (movieId === undefined) {
-    return response(200, { data: actor });
-  }
+      return response(200, { data: actor });
+    }
 
-  // look up the role item for the actor in the movie 
-  const roleResult = await ddb.send(
-    new GetCommand({
-      TableName: tableName,
-      Key: {
-        PK: movieKey(movieId),
-        SK: actorKey(actorId) },
+    // look up the role item for the actor in the movie 
+    const roleResult = await ddb.send(
+      new GetCommand({
+        TableName: tableName,
+        Key: {
+          PK: movieKey(movieId),
+          SK: actorKey(actorId)
+        },
       })
-  );
+    );
 
-  // only add the role description if the actor is actually in that movie
-  const data = roleResult.Item
-  ? { ...actor, roleDescription : roleResult.Item.roleDescription }
-  : actor;
-  return response(200, {data});
+    // only add the role description if the actor is actually in that movie
+    const data = roleResult.Item
+      ? { ...actor, roleDescription: roleResult.Item.roleDescription }
+      : actor;
+    return response(200, { data });
   } catch (err) {
     console.error("DynamoDB error:", err);
     return response(500, { message: "Internal server error", error: err });
