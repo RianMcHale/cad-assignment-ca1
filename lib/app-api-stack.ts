@@ -96,11 +96,16 @@ export class AppApiStack extends cdk.Stack {
 
     const movieRolesResource = moviesResource.addResource('{movieID}').addResource('roles');
     // ensure only signed-in users with valid cognito token cookies can read movie roles
-    movieRolesResource.addMethod('GET', new apig.LambdaIntegration(getMovieRolesFn), userAuth );
+    movieRolesResource.addMethod('GET', new apig.LambdaIntegration(getMovieRolesFn), userAuth);
 
     api.root
       .addResource('actors')
       .addResource('{actorID}')
       .addMethod('GET', new apig.LambdaIntegration(getActorFn), userAuth);
+
+    // POST /movies/roles - add a movie role
+    moviesResource
+      .addResource('roles')
+      .addMethod('POST', new apig.LambdaIntegration(addMovieRoleFn));
   }
 }
