@@ -49,7 +49,7 @@ export class AppApiStack extends cdk.Stack {
     });
 
     table.grantReadData(getMovieRolesFn);
-    table.grantReadData(getActorFn);##
+    table.grantReadData(getActorFn);
 
     // POST lambda needs to read (for condition checks) and write (new roles)
     table.grantReadWriteData(addMovieRoleFn);
