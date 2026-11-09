@@ -4,6 +4,7 @@ import {
   actorKey,
   ddb,
   parseId,
+  movieKey,
   tableName,
   toActor,
 } from "../shared/db";
