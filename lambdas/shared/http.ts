@@ -27,3 +27,9 @@ export const parseJsonObject = (
   }
   return body as Record<string, unknown>;
 };
+
+// logs the error and returns a code 500 error so internal details will never reach the client
+export const serverError = (err: unknown): APIGatewayProxyResult => {
+  console.error('Unexpected error:', err);
+  return response(500, { message: 'Internal server error' });
+};
