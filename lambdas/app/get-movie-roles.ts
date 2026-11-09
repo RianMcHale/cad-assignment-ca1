@@ -48,6 +48,11 @@ export const handler = async (
     // if actor was give n keep that actors role in the movie
     if (actorId !== undefined) {
       roles = roles.filter((role) => role.actorId === actorId);
+
+      // the actor ID is valid but they have no role in this movie
+      if (roles.length === 0) {
+        return response(404, { message: `Actor ${actorId} has no role in movie ${movieId}` });
+      }
     }
     return response(200, { data: roles });
 
