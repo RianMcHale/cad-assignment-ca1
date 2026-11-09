@@ -31,7 +31,17 @@ export const handler = async (
     );
 
     const resultItems = queryResult.Items ?? [];
-    return response(200, { data: resultItems.filter(isRoleItem).map(toRole) });
+    // return response(200, { data: resultItems.filter(isRoleItem).map(toRole) });
+
+    // optional ?actor= query param (query vals arrive as strings)
+    const actorId = parseId(event.queryStringParameters?.actor);
+    let roles = resultItems.filter(isRoleItem).map(toRole);
+    // if actor was give n keep that actors role in the movie
+    if (actorId !== undefined) {
+      roles = roles.filter((role) => role.actorId === actorId);
+    }
+    return response(200, { data: roles });
+
   } catch (err) {
     console.error("DynamoDB error:", err);
     return response(500, {
