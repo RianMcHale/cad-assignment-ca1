@@ -4,6 +4,7 @@ import {
   ddb,
   isRoleItem,
   movieKey,
+  isMovieItem,
   parseId,
   tableName,
   toRole,
@@ -38,6 +39,11 @@ export const handler = async (
     );
 
     const resultItems = queryResult.Items ?? [];
+
+    // the movie item shares the partition with its roles so no movie item means its an unknown movie
+    if (!resultItems.some(isMovieItem)) {
+      return response(404, {message: `Movie $(movieId) not found`});
+    }
     let roles = resultItems.filter(isRoleItem).map(toRole);
     // if actor was give n keep that actors role in the movie
     if (actorId !== undefined) {
