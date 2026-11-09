@@ -20,6 +20,13 @@ export const handler = async (
   if (movieId === undefined) {
     return response(400, { message: "movieID must be a positive integer" });
   }
+
+  // check the optional ?actor value is a vlid Id before querying
+  const actorParam = event.queryStringParameters?.actor;
+  const actorId = parseId(actorParam);
+  if (actorParam !== undefined && actorId === undefined) {
+    return response(400, { message: "actor must be a positive integere"});
+  }
   try {
     const queryResult = await ddb.send(
       new QueryCommand({
