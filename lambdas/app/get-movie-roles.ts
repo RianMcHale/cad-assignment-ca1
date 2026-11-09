@@ -21,11 +21,11 @@ export const handler = async (
     return response(400, { message: "movieID must be a positive integer" });
   }
 
-  // check the optional ?actor value is a vlid Id before querying
+  // check the optional ?actor value is a valid Id before querying
   const actorParam = event.queryStringParameters?.actor;
   const actorId = parseId(actorParam);
   if (actorParam !== undefined && actorId === undefined) {
-    return response(400, { message: "actor must be a positive integere"});
+    return response(400, { message: "actor must be a positive integer"});
   }
   try {
     const queryResult = await ddb.send(
@@ -38,10 +38,6 @@ export const handler = async (
     );
 
     const resultItems = queryResult.Items ?? [];
-    // return response(200, { data: resultItems.filter(isRoleItem).map(toRole) });
-
-    // optional ?actor= query param (query vals arrive as strings)
-    const actorId = parseId(event.queryStringParameters?.actor);
     let roles = resultItems.filter(isRoleItem).map(toRole);
     // if actor was give n keep that actors role in the movie
     if (actorId !== undefined) {
