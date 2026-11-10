@@ -34,6 +34,40 @@ After deploying, the terminal showed the following:
   ```
   The role is saved in a DynamoDB transaction that first checks the movie and the actor both exist, so a role can never point at something that isn't there. All the responses with data use the `{ "data": ... }` structure and only return model data (Role / Actor) and will never show raw table items.
 
+### Authentication
+ 
+**Users (GET requests)** sign in through the Auth API, which uses Cognito:
+1. `POST {AuthApiUrl}auth/signup` with body `{ "username", "password", "email" }`
+2. `POST {AuthApiUrl}auth/confirm_signup` with body `{ "username", "code" }` (the code is emailed)
+3. `POST {AuthApiUrl}auth/signin` with body `{ "username", "password" }`. This sets a `token` cookie.
+4. Send `Cookie: token=<token>` with GET requests. A custom Lambda authorizer checks the token.
+5. `POST {AuthApiUrl}auth/signout` clears the cookie.
+   
+**Admin (POST requests)** uses an API key that API Gateway generates at deployment time and links to the `dev` stage through a usage plan. To get the key value:
+```bash
+aws apigateway get-api-key --api-key <AdminApiKeyId> --include-value --query value --output text
+```
+Send it as the `x-api-key` header on POST requests.
+ 
+### Logging
+ 
+Every request is logged to CloudWatch as `<username>   <path>`, for example:
+```
+rian   /actors/4321?movie=1234
+admin  /movies/roles
+```
+GET requests log the Cognito username from the authorizer. POST requests log `admin`, since they use the API key.
+ 
+### Error responses
+ 
+| Status | When |
+|--------|------|
+| 400 | movieID / actorID / `?actor=` / `?movie=` isn't a positive integer, the body isn't valid JSON, or the POST body doesn't match the Role schema (missing, extra or wrongly typed fields) |
+| 401 / 403 | GET without a valid token cookie, or POST without a valid API key |
+| 404 | Movie or actor doesn't exist, or the actor has no role in the movie (GET `?actor=`) |
+| 409 | POST for a role the actor already has in that movie |
+| 500 | Unexpected error. The real error is logged to CloudWatch, and the client only gets "Internal server error" |
+
 ## Cloud App Development - Assignment.
 
 This repository contains an implementation of the serverless web API specified below, and the CDK code to provision its infrastructure for the AWS cloud. However, it is incomplete as there are bugs and missing features.
