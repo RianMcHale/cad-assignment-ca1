@@ -17,7 +17,28 @@ export const handler = async (
   };
 
   try {
-    //  TOD∏O - Add role if its IDs are valid
+        // REQUIRED!!! role is only saved if every check passes
+    await ddb.send(
+      new TransactWriteCommand({
+        TransactItems: [
+          // requirement 1 - the movie must exist
+          {
+            ConditionCheck: {
+              TableName: tableName,
+              Key: { PK: movieKey(role.movieId), SK: movieKey(role.movieId) },
+              ConditionExpression: "attribute_exists(PK)",
+            },
+          },
+          // requirement 3 - save the role with the single-table keys (m#movieID | a#actorID)
+          {
+            Put: {
+              TableName: tableName,
+              Item: { PK: movieKey(role.movieId), SK: actorKey(role.actorId), ...role },
+            },
+          },
+        ],
+      })
+    );
     return response(201, { message: "Role added", data: role });
   } catch (err) {
     return serverError(err);
