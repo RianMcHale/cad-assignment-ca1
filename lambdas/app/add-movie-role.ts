@@ -5,6 +5,7 @@ import { isResponse, parseJsonObject, response, serverError } from "../shared/ht
 import Ajv from "ajv";
 import schema from "../shared/types.schema.json"
 import type { TransactionCanceledException } from "@aws-sdk/client-dynamodb";
+import { logRequest } from "../shared/request-logger";
 
 // validator built from the role interfaces JSON schema (created with npm run schema)
 const ajv = new Ajv();
@@ -15,6 +16,9 @@ export const handler = async (
 ): Promise<APIGatewayProxyResult> => {
   const body = parseJsonObject(event);
   if (isResponse(body)) return body;
+
+  // log admin POST requests too like the GET lambdas
+  logRequest(event);
 
   // reject bodies with missing, extra or wrongly typed fields
   if (!isValidRole(body)) {
