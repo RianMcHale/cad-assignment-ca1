@@ -1,3 +1,39 @@
+## My Implementation – Rían McHale (20107772)
+ 
+This section explains how I altered the starter code and what I built on top of it too. The original assignment brief is below this section.
+ 
+### Deploying
+ 
+```bash
+npm install
+npm run schema        # generates lambdas/shared/role.schema.json, used by AJV to validate POST bodies
+npx cdk deploy --all  # deploys CognitoStack and AppApiStack
+```
+ 
+I deployed to **eu-north-1** (Stockholm) because originally, my AWS organisation's region policy blocked eu-west-1. The code doesn't hardcode a region, so it deploys to whatever region the AWS CLI was set to.
+The AWS organisation issue was fixed later on, but I had already began work on **eu-north-1** so I decided to continue with it, and used the AWS region policy issue as a learning experience.
+ 
+After deploying, the terminal showed the following:
+- `CognitoStack.AuthApiUrl`: the Auth API (signup / signin / signout)
+- `AppApiStack.AppApiEndpoint...`: the App API (movies / actors)
+- `AppApiStack.AdminApiKeyId`: the ID of the admin API key
+
+### Endpoints
+ 
+| Method | Path | Query params | Who can call it |
+|--------|------|--------------|-----------------|
+| GET | `/movies/{movieID}/roles` | `?actor=actorID` (optional) | Signed-in users |
+| GET | `/actors/{actorID}` | `?movie=movieID` (optional) | Signed-in users |
+| POST | `/movies/roles` | none | Admin (API key) |
+ 
+- **GET /movies/{movieID}/roles** returns all roles in the movie. With `?actor=`, only that actor's role in the movie is returned.
+- **GET /actors/{actorID}** returns the actor's profile. With `?movie=`, the response also includes `roleDescription` if the actor is in that movie.
+- **POST /movies/roles** adds a role. Body:
+  ```json
+  { "movieId": 1236, "actorId": 4322, "roleName": "John Doe", "roleDescription": "The killer." }
+  ```
+  The role is saved in a DynamoDB transaction that first checks the movie and the actor both exist, so a role can never point at something that isn't there. All the responses with data use the `{ "data": ... }` structure and only return model data (Role / Actor) and will never show raw table items.
+
 ## Cloud App Development - Assignment.
 
 This repository contains an implementation of the serverless web API specified below, and the CDK code to provision its infrastructure for the AWS cloud. However, it is incomplete as there are bugs and missing features.
