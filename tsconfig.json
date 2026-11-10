@@ -29,10 +29,16 @@
     "types": [
       "jest",
       "node"
-    ]
+    ],
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
   },
   "exclude": [
     "node_modules",
     "cdk.out"
+  ],
+  "include": [
+    "**/*.ts",
+    "lambdas/shared/*.json"
   ]
 }
