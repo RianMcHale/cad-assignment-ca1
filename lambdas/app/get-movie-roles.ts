@@ -35,7 +35,7 @@ export const handler = async (
 
     // the movie item shares the partition with its roles so no movie item means its an unknown movie
     if (!resultItems.some(isMovieItem)) {
-      return response(404, { message: `Movie $(movieId) not found` });
+      return response(404, { message: `Movie ${movieId} not found` });
     }
     let roles = resultItems.filter(isRoleItem).map(toRole);
     // if actor was give n keep that actors role in the movie
