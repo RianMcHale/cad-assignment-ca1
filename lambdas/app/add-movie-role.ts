@@ -73,7 +73,7 @@ const transactionErrorResponse = (
   err: TransactionCanceledException,
   role: Role
 ): APIGatewayProxyResult => {
-  const [, , roleExists] = (err.CancellationReasons ?? []).map(
+  const [movieMissing, actorMissing, roleExists] = (err.CancellationReasons ?? []).map(
     (reason) => reason.Code === "ConditionalCheckFailed"
   );
   if (roleExists) {
@@ -81,5 +81,12 @@ const transactionErrorResponse = (
       message: `Actor ${role.actorId} already has a role in movie ${role.movieId}`,
     });
   }
+  // report one of the two condition checks failed
+  if (movieMissing) return response(404, {
+    message: `Movie ${role.movieId} not found`
+  });
+  if (actorMissing) return response(404, {
+    message: `Actor ${role.actorId} not found`
+  });
   return serverError(err);
 };
