@@ -17,7 +17,7 @@ export const handler = async (
   };
 
   try {
-        // REQUIRED!!! role is only saved if every check passes
+    // REQUIRED!!! role is only saved if every check passes
     await ddb.send(
       new TransactWriteCommand({
         TransactItems: [
@@ -26,6 +26,14 @@ export const handler = async (
             ConditionCheck: {
               TableName: tableName,
               Key: { PK: movieKey(role.movieId), SK: movieKey(role.movieId) },
+              ConditionExpression: "attribute_exists(PK)",
+            },
+          },
+          // requirement 2 - the actor must exist (thought the Put would auto-add this, it did not after testing)
+          {
+            ConditionCheck: {
+              TableName: tableName,
+              Key: { PK: actorKey(role.actorId), SK: actorKey(role.actorId) },
               ConditionExpression: "attribute_exists(PK)",
             },
           },
