@@ -6,7 +6,7 @@
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
-    "schema": "typescript-json-schema --noExtraProps --required --refs false -o ./lambdas/shared/types.schema.json \"./lambdas/shared/model.ts\" \"*\""
+    "schema": "typescript-json-schema --noExtraProps --required --refs false -o ./lambdas/shared/types.schema.json \"./lambdas/shared/model.ts\" Role"
   },
   "devDependencies": {
     "@swc/core": "^1.15.0",

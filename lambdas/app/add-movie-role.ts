@@ -2,6 +2,12 @@ import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { TransactWriteCommand } from "@aws-sdk/lib-dynamodb";
 import { actorKey, ddb, movieKey, type Role, tableName } from "../shared/db";
 import { isResponse, parseJsonObject, response, serverError } from "../shared/http";
+import Ajv from "ajv";
+import schema from "../shared/types.schema.json"
+
+// validator built from the role interfaces JSON schema (created with npm run schema)
+const ajv = new Ajv();
+const isValidRole = ajv.compile<Role>(schema);
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -9,12 +15,14 @@ export const handler = async (
   const body = parseJsonObject(event);
   if (isResponse(body)) return body;
 
-  const role: Role = {
-    movieId: body.movieId as number,
-    actorId: body.actorId as number,
-    roleName: body.roleName as string,
-    roleDescription: body.roleDescription as string,
-  };
+  // reject bodies with missing, extra or wrongly typed fields
+  if (!isValidRole(body)) {
+    return response(400, {
+      message: "Incorrect type. Must match the Role schema",
+      schema: schema,
+    });
+  }
+  const role: Role = body;
 
   try {
     // REQUIRED!!! role is only saved if every check passes
