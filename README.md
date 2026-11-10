@@ -6,7 +6,7 @@ This section explains how I altered the starter code and what I built on top of 
  
 ```bash
 npm install
-npm run schema        # generates lambdas/shared/role.schema.json, used by AJV to validate POST bodies
+npm run schema        # generates lambdas/shared/types.schema.json, used by AJV to validate POST bodies
 npx cdk deploy --all  # deploys CognitoStack and AppApiStack
 ```
  
